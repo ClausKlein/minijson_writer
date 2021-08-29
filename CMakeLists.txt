@@ -6,52 +6,43 @@
 #   $ cd build
 #   $ cmake ..
 #   $ make
-#   $ ./minijson_writer_tests
-# You can append -DCPP11:int=1 to the cmake command to build in C++11 mode.
+#   $ ctest
+#   $ make install
 
-cmake_minimum_required(VERSION 2.8.7)
-project(minijson_writer)
+cmake_minimum_required(VERSION 3.13...3.21)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-if(MSVC)
-    # Force to always compile with W4
-    if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
-        string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-    else()
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
-    endif()
-elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
-    # Update if necessary
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -Wno-unknown-pragmas")
-
-    if(CPP11)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-    else()
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++03")
-        find_package(Boost 1.55 REQUIRED)
-        include_directories(${Boost_INCLUDE_DIRS})
-    endif()
-endif()
-
-if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-local-typedef")
-endif()
+project(minijson_writer LANGUAGES CXX)
 
 find_package(GTest REQUIRED)
-include_directories(${GTEST_INCLUDE_DIRS})
 
 enable_testing()
 
-add_executable(minijson_writer_tests
-    minijson_writer_tests.cpp
-)
+add_executable(minijson_writer_tests minijson_writer_tests.cpp minijson_writer.hpp)
+target_link_libraries(minijson_writer_tests GTest::gtest_main)
+set_target_properties(minijson_writer_tests PROPERTIES CXX_STANDARD 17)
+# being a cross-platform target, we enforce standards conformance on MSVC
+target_compile_options(minijson_writer_tests PUBLIC "$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/permissive->")
 
-target_link_libraries(minijson_writer_tests
-    ${GTEST_BOTH_LIBRARIES})
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND CMAKE_CXX_SIMULATE_ID MATCHES "MSVC")
+  target_compile_options(${PROJECT_NAME}_tests PRIVATE /W4 /WX)
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  target_compile_options(${PROJECT_NAME}_tests PRIVATE -Wall -Wextra -Werror -Wshadow -Wno-unknown-pragmas)
 
-if(UNIX)
-    target_link_libraries(minijson_writer_tests
-        pthread)
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION GREATER_EQUAL 10.0)
+    target_compile_options(${PROJECT_NAME}_tests PRIVATE -Wdeprecated-copy-dtor -Wnewline-eof)
+  endif()
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+  string(REGEX REPLACE " /W[0-4]" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+  target_compile_options(${PROJECT_NAME}_tests PRIVATE /W4 /WX)
 endif()
 
-add_test(NAME all
-    COMMAND minijson_writer_tests)
+# FIXME: realy needed? CK
+# if(UNIX)
+#   target_link_libraries(minijson_writer_tests pthread)
+# endif()
+
+add_test(NAME all COMMAND minijson_writer_tests)
+
+install(FILES minijson_writer.hpp DESTINATION include)
+
