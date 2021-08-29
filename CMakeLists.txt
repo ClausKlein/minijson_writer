@@ -27,7 +27,7 @@ target_compile_options(minijson_writer_tests PUBLIC "$<$<COMPILE_LANG_AND_ID:CXX
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND CMAKE_CXX_SIMULATE_ID MATCHES "MSVC")
   target_compile_options(${PROJECT_NAME}_tests PRIVATE /W4 /WX)
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-  target_compile_options(${PROJECT_NAME}_tests PRIVATE -Wall -Wextra -Werror -Wshadow -Wno-unknown-pragmas)
+  target_compile_options(${PROJECT_NAME}_tests PRIVATE -Wall -Wextra -Werror -Wno-shadow -Wno-unknown-pragmas)
 
   if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION GREATER_EQUAL 10.0)
     target_compile_options(${PROJECT_NAME}_tests PRIVATE -Wdeprecated-copy-dtor -Wnewline-eof)
