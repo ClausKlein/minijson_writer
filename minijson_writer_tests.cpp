@@ -117,7 +117,7 @@ TEST(minijson_writer, nesting_simple) {
   {
     minijson::object_writer nested_writer = writer.nested_object("nested");
     nested_writer.write("foo", "bar");
-    nested_writer.close();
+    // nested_writer.close();  // NOTE: not really needed here, RAII is used!
   }
   writer.close();
   ASSERT_EQ("{\"nested\":{\"foo\":\"bar\"}}", stream.str());
@@ -139,11 +139,12 @@ TEST(minijson_writer, nesting_complex) {
       {
         minijson::array_writer nested_writer3 = nested_writer2.nested_array();
         nested_writer3.write("value5");
-        nested_writer3.nested_object().close();
-        nested_writer3.close();
+        nested_writer3.nested_object().close();  // TODO: why needed? CK
+        // nested_writer3.close();  // NOTE: not really needed here, RAII is
+        // used!
       }
       nested_writer2.write("value6");
-      nested_writer2.close();
+      // nested_writer2.close();  // NOTE: not really needed here, RAII is used!
     }
     nested_writer1.nested_array("nestedempty").close();
     nested_writer1.close();
@@ -267,7 +268,7 @@ struct default_value_writer<point3d> final {
     writer.write("x", value.x);
     writer.write("y", value.y);
     writer.write("z", value.z);
-    writer.close();
+    // writer.close();  // NOTE: not really needed here, RAII is used!
   }
 };
 
@@ -449,14 +450,15 @@ TEST(minijson_writer, pretty_printing_nested) {
       {
         minijson::array_writer nested_writer3 = nested_writer2.nested_array();
         nested_writer3.write("value5");
-        nested_writer3.nested_object().close();
-        nested_writer3.close();
+        nested_writer3.nested_object().close();  // TODO: why needed? CK
+        // nested_writer3.close();  // NOTE: not really needed here, RAII is
+        // used!
       }
       nested_writer2.write("value6");
-      nested_writer2.close();
+      // nested_writer2.close();  // NOTE: not really needed here, RAII is used!
     }
     nested_writer1.nested_array("nestedempty").close();
-    nested_writer1.close();
+    // nested_writer1.close();  // NOTE: not really needed here, RAII is used!
   }
   writer.close();
 
