@@ -32,6 +32,24 @@ TEST(minijson_writer, single_element_object) {
   ASSERT_EQ("{\"int\":42}", stream.str());
 }
 
+TEST(minijson_writer, single_element_object_RAII) {
+  std::stringstream stream;
+  {
+    minijson::object_writer writer(stream);
+    writer.write("int", 42);
+  }
+  ASSERT_EQ("{\"int\":42}", stream.str());
+}
+
+TEST(minijson_writer, single_element_array_RAII) {
+  std::stringstream stream;
+  {
+    minijson::array_writer writer(stream);
+    writer.write("foo");
+  }
+  ASSERT_EQ("[\"foo\"]", stream.str());
+}
+
 TEST(minijson_writer, single_element_array) {
   std::stringstream stream;
   minijson::array_writer writer(stream);

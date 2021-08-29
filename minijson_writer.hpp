@@ -382,6 +382,14 @@ class writer {
 
   const writer_configuration& configuration() const { return m_configuration; }
 
+  virtual ~writer() {
+    try {
+      close();  // RAII: never forget to call close(), even after an exeption! CK
+    } catch (...) {
+      ;  // NOTE: ignored ...
+    }
+  }
+
   void close() {
     if (m_status == CLOSED) { return; }
 

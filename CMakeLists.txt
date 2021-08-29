@@ -14,13 +14,13 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 project(minijson_writer LANGUAGES CXX)
 
+# ---- dependency ----
 find_package(GTest REQUIRED)
-
-enable_testing()
 
 add_executable(minijson_writer_tests minijson_writer_tests.cpp minijson_writer.hpp)
 target_link_libraries(minijson_writer_tests GTest::gtest_main)
 set_target_properties(minijson_writer_tests PROPERTIES CXX_STANDARD 17)
+
 # being a cross-platform target, we enforce standards conformance on MSVC
 target_compile_options(minijson_writer_tests PUBLIC "$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/permissive->")
 
@@ -37,12 +37,22 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   target_compile_options(${PROJECT_NAME}_tests PRIVATE /W4 /WX)
 endif()
 
-# FIXME: realy needed? CK
-# if(UNIX)
-#   target_link_libraries(minijson_writer_tests pthread)
-# endif()
+# ---- code coverage ----
 
-add_test(NAME all COMMAND minijson_writer_tests)
+if(NOT MSVC)
+  option(ENABLE_TEST_COVERAGE "Enable test coverage" ON)
+  if(ENABLE_TEST_COVERAGE AND "${CMAKE_BUILD_TYPE}" STREQUAL Debug)
+    target_compile_options(minijson_writer_tests PUBLIC -O0 -g -fprofile-arcs -ftest-coverage)
+    target_link_options(minijson_writer_tests PUBLIC -fprofile-arcs -ftest-coverage)
+  endif()
+endif()
+
+# ---- ctest ----
+
+enable_testing()
+add_test(NAME ${PROJECT_NAME} COMMAND minijson_writer_tests)
+
+# ---- install ----
 
 install(FILES minijson_writer.hpp DESTINATION include)
 
