@@ -25,6 +25,10 @@ set(CMAKE_CXX_STANDARD
     CACHE STRING "The used c++ standard"
 )
 
+# Where to put all the RUNTIME targets when built. (ddl, exe)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
 # ---- dependency ----
 include(cmake/CPM.cmake)
 
@@ -56,10 +60,6 @@ add_library(minijson::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 # ---- Create executables ----
 
 if(BUILD_TESTS)
-  # Where to put all the RUNTIME targets when built.  This variable is used to
-  # initialize the RUNTIME_OUTPUT_DIRECTORY property on all the targets.
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
-
   add_executable(minijson_writer_tests minijson_writer_tests.cpp minijson_writer.hpp)
   target_link_libraries(minijson_writer_tests minijson::${PROJECT_NAME} GTest::gtest_main)
 
