@@ -128,8 +128,8 @@ struct two_or_three_args_functor {
   }
 
  public:
-  explicit two_or_three_args_functor(Functor functor)
-      : functor(std::move(functor)) {}
+  explicit two_or_three_args_functor(Functor _functor)
+      : functor(std::move(_functor)) {}
 
   template <typename Arg1, typename Arg2, typename Arg3>
   void operator()(Arg1&& arg1, Arg2&& arg2, Arg3&& arg3) {
@@ -289,7 +289,7 @@ class writer {
   void write_pretty_print_token(pretty_print_token token) {
     if (!m_configuration.pretty_printing()) { return; }
 
-    detail::buffered_writer<16> writer(*m_stream);
+    detail::buffered_writer<16> my_writer(*m_stream);
 
     if ((token == BEFORE_ELEMENT) ||
         ((token == BEFORE_CLOSING_BRACKET) && (m_status != EMPTY))) {
@@ -300,16 +300,16 @@ class writer {
               : (base_depth + m_configuration.nesting_level()) *
                     m_configuration.indent_spaces();
 
-      writer << '\n';
+      my_writer << '\n';
 
       for (size_t i = 0; i < no_indent_characters; i++) {
-        writer << ((m_configuration.use_tabs()) ? '\t' : ' ');
+        my_writer << ((m_configuration.use_tabs()) ? '\t' : ' ');
       }
     } else if (token == AFTER_COLON) {
-      writer << ' ';
+      my_writer << ' ';
     }
 
-    writer.flush();
+    my_writer.flush();
   }
 
   void write_opening_bracket() {
