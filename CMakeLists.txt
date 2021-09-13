@@ -47,8 +47,7 @@ endif()
 # ---- Create library ----
 
 # Note: for header-only libraries change all PUBLIC flags to INTERFACE
-add_library(${PROJECT_NAME} INTERFACE minijson_writer.hpp)
-set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD ${CMAKE_CXX_STANDARD})
+add_library(${PROJECT_NAME} INTERFACE)
 target_include_directories(
   ${PROJECT_NAME} BEFORE INTERFACE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}> $<INSTALL_INTERFACE:include>
 )
