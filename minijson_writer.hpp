@@ -190,13 +190,13 @@ class buffered_writer {
 
 namespace {
 
-void adjust_stream_settings(std::ostream& stream) {
+inline void adjust_stream_settings(std::ostream& stream) {
   stream.imbue(std::locale::classic());
   stream << std::resetiosflags(std::ios::showpoint | std::ios::showpos);
   stream << std::dec << std::setw(0);
 }
 
-void write_quoted_string(std::ostream& stream, const char* str) {
+inline void write_quoted_string(std::ostream& stream, const char* str) {
   stream << std::hex << std::right << std::setfill('0');
 
   buffered_writer<> writer(stream);
