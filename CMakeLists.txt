@@ -12,7 +12,7 @@
 cmake_minimum_required(VERSION 3.13...3.21)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-project(minijson_writer LANGUAGES CXX)
+project(minijson_writer VERSION 0.9.0 LANGUAGES CXX)
 
 if(PROJECT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
   set(MINIJSON_MASTER_PROJECT YES)
@@ -34,7 +34,6 @@ include(cmake/CPM.cmake)
 
 option(BUILD_TESTS "Build tests" ${MINIJSON_MASTER_PROJECT})
 if(BUILD_TESTS)
-  #XXX find_package(GTest 1.11 REQUIRED)
   CPMAddPackage(
     NAME googletest
     GITHUB_REPOSITORY google/googletest
@@ -97,5 +96,6 @@ endif()
 
 option(MINIJSON_INSTALL "Generate the install target" ${MINIJSON_MASTER_PROJECT})
 if(MINIJSON_INSTALL)
+  # TODO: export cmake config packages too! CK
   install(FILES minijson_writer.hpp DESTINATION include)
 endif()
