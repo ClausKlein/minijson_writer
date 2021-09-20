@@ -14,7 +14,7 @@ Despite being a single header file of ~900 LOC, `minijson_writer` is complete an
 
 ## Dependencies
 
-If the compiler does **not** support C++11, Boost 1.55 or better is required.
+Gtest for testing, C++11 or even better C++17
 
 ## Basic usage
 
@@ -27,8 +27,8 @@ writer.write("field2", true); // boolean
 writer.write("field3", 42.42); // floating point types
 writer.write("field4", "foo"); // char[] and char*
 writer.write("field5", std::string("bar")); // std::string
-writer.write("field6", minijson::null); // null type (on C++11 you can use nullptr)
-writer.close(); // always call close() when you are done
+writer.write("field6", minijson::null); // null type (or nullptr)
+writer.close(); // you may always call close() when you are done
 ```
 
 Writing a JSON **array**:
@@ -40,8 +40,8 @@ writer.write(true); // boolean
 writer.write(42.42); // floating point types
 writer.write("foo"); // char[] and char*
 writer.write(std::string("bar")); // std::string
-writer.write(minijson::null); // null type (on C++11 you can use nullptr)
-writer.close(); // always call close() when you are done
+writer.write(minijson::null); // null type (or nullptr)
+writer.close(); // you may always call close() when you are done
 ```
 
 ## Nested objects and arrays
@@ -55,13 +55,13 @@ writer.write("name", "Los Angeles");
   minijson::object_writer position_writer = writer.nested_object("position");
   position_writer.write("n", 34.05);
   position_writer.write("w", 118.25);
-  position_writer.close();
+  position_writer.close();  // NOTE: not really needed here, RAII is used!
 }
 {
   minijson::array_writer mayors_writer = writer.nested_array("mayors");
   mayors_writer.write("Villaraigosa");
   mayors_writer.write("Garcetti");
-  mayors_writer.close();
+  mayors_writer.close();  // NOTE: not really needed here, RAII is used!
 }
 writer.close();
 ```
@@ -106,7 +106,7 @@ struct default_value_writer<position>
     minijson::object_writer writer(stream, configuration);
     writer.write("n", p.n);
     writer.write("w", p.w);
-    writer.close();
+    writer.close();  // NOTE: not really needed here, RAII is used!
   }
 };
 
@@ -203,4 +203,4 @@ In general, no exceptions are thrown unless the stream does: in that case, [basi
 
 ### Copy construction
 
-Copying a writer is allowed (for C++03 compatibility, e.g. when storing writers into STL containers) and is safe, as long as only **one** copy is then used for writing on the stream.
+Copying a writer is allowed and is safe, as long as only **one** copy is then used for writing on the stream.
