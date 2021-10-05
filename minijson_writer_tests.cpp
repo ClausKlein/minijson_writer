@@ -60,6 +60,8 @@ TEST(minijson_writer, single_element_array) {
 }
 
 TEST(minijson_writer, basic_object) {
+  using namespace std::string_literals;
+
   std::stringstream stream;
   minijson::object_writer writer(stream);
   writer.write("int", 42);
@@ -67,16 +69,19 @@ TEST(minijson_writer, basic_object) {
   writer.write("false", false);
   writer.write("double", 42.42);
   writer.write("char*", "foo");
-  writer.write("string", std::string("bar"));
+  writer.write("string", std::string("foo\0\nbar"s));
   writer.write("null1", minijson::null);
   writer.write("null2", nullptr);
   writer.close();
   ASSERT_EQ("{\"int\":42,\"true\":true,\"false\":false,\"double\":42.42,\"char*"
-            "\":\"foo\",\"string\":\"bar\",\"null1\":null,\"null2\":null}",
+            "\":\"foo\",\"string\":\"foo\\u0000\\nbar\",\"null1\":null,"
+            "\"null2\":null}",
       stream.str());
 }
 
 TEST(minijson_writer, basic_array) {
+  using namespace std::string_literals;
+
   std::stringstream stream;
   minijson::array_writer writer(stream);
   writer.write(42);
@@ -84,11 +89,12 @@ TEST(minijson_writer, basic_array) {
   writer.write(false);
   writer.write(42.42);
   writer.write("foo");
-  writer.write(std::string("bar"));
+  writer.write(std::string("foo\0\nbar"s));
   writer.write(minijson::null);
   writer.write(nullptr);
   writer.close();
-  ASSERT_EQ("[42,true,false,42.42,\"foo\",\"bar\",null,null]", stream.str());
+  ASSERT_EQ("[42,true,false,42.42,\"foo\",\"foo\\u0000\\nbar\",null,null]",
+      stream.str());
 }
 
 TEST(minijson_writer, escaping) {

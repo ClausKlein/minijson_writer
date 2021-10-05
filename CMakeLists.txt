@@ -9,10 +9,10 @@
 #   $ ctest
 #   $ make install
 
-cmake_minimum_required(VERSION 3.13...3.21)
+cmake_minimum_required(VERSION 3.14...3.21)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-project(minijson_writer VERSION 0.9.0 LANGUAGES CXX)
+project(minijson_writer VERSION 0.9.1 LANGUAGES CXX)
 
 if(PROJECT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
   set(MINIJSON_MASTER_PROJECT YES)
