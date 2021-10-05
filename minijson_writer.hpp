@@ -7,7 +7,7 @@
 #include <iterator>
 #include <locale>
 #include <ostream>
-#include <string>
+#include <string_view>
 #include <type_traits>
 #include <utility>
 
@@ -196,11 +196,10 @@ inline void adjust_stream_settings(std::ostream& stream) {
   stream << std::dec << std::setw(0);
 }
 
+#if 0
 inline void write_quoted_string(std::ostream& stream, const char* str) {
   stream << std::hex << std::right << std::setfill('0');
-
   buffered_writer<> writer(stream);
-
   writer << '"';
 
   while (*str != '\0') {
@@ -220,7 +219,6 @@ inline void write_quoted_string(std::ostream& stream, const char* str) {
             *str == 127)  // ASCII control characters (NUL is not supported)
         {
           writer << "\\u";
-
           writer.flush();
           stream << std::setw(4) << static_cast<unsigned>(*str);
         } else {
@@ -232,9 +230,44 @@ inline void write_quoted_string(std::ostream& stream, const char* str) {
   }
 
   writer << '"';
-
   writer.flush();
+  stream << std::dec;
+}
+#endif
 
+inline void write_quoted_string(std::ostream& stream,
+    const std::string_view str) {
+  stream << std::hex << std::right << std::setfill('0');
+  stream << '"';
+
+  for (auto c : str) {
+    switch (c) {
+      case '"': stream << "\\\""; break;
+
+      case '\\': stream << "\\\\"; break;
+
+      case '\n': stream << "\\n"; break;
+
+      case '\r': stream << "\\r"; break;
+
+      case '\t': stream << "\\t"; break;
+
+      default:
+        // TODO: that may also work CK! if (std::iscntrl(c))
+        // NOTE: this writes "\0" too! CK
+        if ((c >= 0 && c < 32) || c == 127) {
+          stream << "\\u";
+          stream.flush();
+          stream << std::setw(4) << static_cast<unsigned>(c);
+        } else {
+          stream << c;
+        }
+        break;
+    }
+  }
+
+  stream << '"';
+  stream.flush();
   stream << std::dec;
 }
 
@@ -384,7 +417,8 @@ class writer {
 
   virtual ~writer() {
     try {
-      close();  // RAII: never forget to call close(), even after an exeption! CK
+      close();  // RAII: never forget to call close(), even after an exeption!
+                // CK
     } catch (...) {
       ;  // NOTE: ignored ...
     }
@@ -565,6 +599,13 @@ struct default_value_writer<FloatingPoint,
 };
 
 template <>
+struct default_value_writer<std::string_view> {
+  void operator()(std::ostream& stream, const std::string_view str) const {
+    detail::write_quoted_string(stream, str);
+  }
+};
+
+template <>
 struct default_value_writer<char*> {
   void operator()(std::ostream& stream, const char* str) const {
     detail::write_quoted_string(stream, str);
@@ -576,16 +617,18 @@ struct default_value_writer<const char*> : public default_value_writer<char*> {
 };
 
 template <size_t N>
-struct default_value_writer<char[N]> : public default_value_writer<char*> {};
+struct default_value_writer<char[N]> : public default_value_writer<char*> {
+};  // FIXME: this may discard some chars! CK
 
 template <size_t N>
 struct default_value_writer<const char[N]>
-    : public default_value_writer<char*> {};
+    : public default_value_writer<char*> {
+};  // FIXME: this may discard some chars! CK
 
 template <>
 struct default_value_writer<std::string> {
   void operator()(std::ostream& stream, const std::string& str) const {
-    default_value_writer<char*>()(stream, str.c_str());
+    default_value_writer<std::string_view>()(stream, str);
   }
 };
 
