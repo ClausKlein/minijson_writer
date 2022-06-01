@@ -34,7 +34,7 @@ BraceWrapping:
   SplitEmptyFunction: false
   SplitEmptyRecord: false
   SplitEmptyNamespace: false
-ColumnLimit:      80 ## 123 # XXX CK!
+ColumnLimit:      123 # XXX CK!
 DerivePointerAlignment: false
 IncludeBlocks:   Regroup
 IncludeCategories:

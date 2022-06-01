@@ -9,7 +9,7 @@
 #   $ ctest
 #   $ make install
 
-cmake_minimum_required(VERSION 3.14...3.21)
+cmake_minimum_required(VERSION 3.16...3.23)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 project(minijson_writer VERSION 0.9.1 LANGUAGES CXX)
@@ -20,10 +20,7 @@ endif()
 
 option(CMAKE_CXX_EXTENSIONS "Default value for CXX_EXTENSIONS property of targets." NO)
 option(CMAKE_CXX_STANDARD_REQUIRED "The c++ standard is requrired" YES)
-set(CMAKE_CXX_STANDARD
-    17
-    CACHE STRING "The used c++ standard"
-)
+set(CMAKE_CXX_STANDARD 17 CACHE STRING "The used c++ standard")
 
 # Where to put all the RUNTIME targets when built. (ddl, exe)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -39,7 +36,7 @@ if(BUILD_TESTS)
     GITHUB_REPOSITORY google/googletest
     GIT_TAG release-1.11.0
     VERSION 1.11.0
-    OPTIONS "BUILD_GMOCK OFF" "gtest_force_shared_crt"
+    OPTIONS "BUILD_GMOCK OFF" "gtest_force_shared_crt" "INSTALL_GTEST OFF"
   )
 endif()
 
@@ -64,7 +61,14 @@ if(BUILD_TESTS)
   if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND CMAKE_CXX_SIMULATE_ID MATCHES "MSVC")
     target_compile_options(${PROJECT_NAME}_tests PRIVATE /W4 /WX)
   elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    target_compile_options(${PROJECT_NAME}_tests PRIVATE -Wall -Wextra -Werror -Wno-shadow -Wno-unknown-pragmas)
+    target_compile_options(
+      ${PROJECT_NAME}_tests
+      PRIVATE -Wall
+              -Wextra
+              -Werror
+              -Wno-shadow
+              -Wno-unknown-pragmas
+    )
 
     if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION GREATER_EQUAL 10.0)
       target_compile_options(${PROJECT_NAME}_tests PRIVATE -Wdeprecated-copy-dtor -Wnewline-eof)

@@ -93,8 +93,7 @@ TEST(minijson_writer, basic_array) {
   writer.write(minijson::null);
   writer.write(nullptr);
   writer.close();
-  ASSERT_EQ("[42,true,false,42.42,\"foo\",\"foo\\u0000\\nbar\",null,null]",
-      stream.str());
+  ASSERT_EQ("[42,true,false,42.42,\"foo\",\"foo\\u0000\\nbar\",null,null]", stream.str());
 }
 
 TEST(minijson_writer, escaping) {
@@ -138,8 +137,7 @@ TEST(minijson_writer, nesting_complex) {
     minijson::object_writer nested_writer1 = writer.nested_object();
     nested_writer1.write("field2", "value2");
     {
-      minijson::array_writer nested_writer2 =
-          nested_writer1.nested_array("nested2");
+      minijson::array_writer nested_writer2 = nested_writer1.nested_array("nested2");
       nested_writer2.write("value3");
       nested_writer2.write("value4");
       {
@@ -210,8 +208,7 @@ TEST(minijson_writer, invalid_floats) {
   writer.write("neginfinity", -1.0 / return_zero());
   writer.write("nan", 0.0 / return_zero());
   writer.close();
-  ASSERT_EQ("{\"posinfinity\":null,\"neginfinity\":null,\"nan\":null}",
-      stream.str());
+  ASSERT_EQ("{\"posinfinity\":null,\"neginfinity\":null,\"nan\":null}", stream.str());
 }
 #pragma warning(pop)
 
@@ -246,8 +243,7 @@ struct point3d {
 };
 
 struct point_type_writer final {
-  void operator()(std::ostream& stream,
-      point_type value) /* intentionally non-const */
+  void operator()(std::ostream& stream, point_type value) /* intentionally non-const */
   {
     const char* str = "";
     switch (value) {
@@ -259,17 +255,13 @@ struct point_type_writer final {
   }
 };
 
-void point_type_writer_func(std::ostream& stream, point_type value) {
-  point_type_writer()(stream, value);
-}
+void point_type_writer_func(std::ostream& stream, point_type value) { point_type_writer()(stream, value); }
 
 namespace minijson {
 
 template <>
 struct default_value_writer<point3d> final {
-  void operator()(std::ostream& stream,
-      const point3d& value,
-      const writer_configuration& configuration) const {
+  void operator()(std::ostream& stream, const point3d& value, const writer_configuration& configuration) const {
     minijson::object_writer writer(stream, configuration);
     writer.write("x", value.x);
     writer.write("y", value.y);
@@ -280,9 +272,7 @@ struct default_value_writer<point3d> final {
 
 }  // namespace minijson
 
-void point3d_writer_func(std::ostream& stream,
-    const point3d& value,
-    minijson::writer_configuration configuration) {
+void point3d_writer_func(std::ostream& stream, const point3d& value, minijson::writer_configuration configuration) {
   minijson::default_value_writer<point3d>()(stream, value, configuration);
 }
 
@@ -300,18 +290,13 @@ TEST(minijson_writer, custom_value_writer_object) {
   minijson::object_writer writer(stream);
   writer.write("type1", FIXED, point_type_writer());      // functor
   writer.write("type2", MOVING, point_type_writer_func);  // function
-  writer.write("point1", point1);  // template specialisation
-  writer.write("point2", point2, point3d_writer_func);  // function
-  writer.write_array("points",
-      points.begin(),
+  writer.write("point1", point1);                         // template specialisation
+  writer.write("point2", point2, point3d_writer_func);    // function
+  writer.write_array("points", points.begin(),
       points.end());  // template specialisation
-  writer.write_array("types1",
-      types,
-      types + 2,
+  writer.write_array("types1", types, types + 2,
       point_type_writer());  // functor
-  writer.write_array("types2",
-      types,
-      types + 2,
+  writer.write_array("types2", types, types + 2,
       point_type_writer_func);  // function
   writer.close();
 
@@ -343,7 +328,7 @@ TEST(minijson_writer, custom_value_writer_array) {
     writer.write(point1);                          // template specialisation
     writer.write(point2, point3d_writer_func);     // function
     writer.write_array(points.begin(),
-        points.end());  // template specialisation
+        points.end());                                             // template specialisation
     writer.write_array(types, types + 2, point_type_writer());     // functor
     writer.write_array(types, types + 2, point_type_writer_func);  // function
     writer.close();
@@ -361,9 +346,7 @@ TEST(minijson_writer, custom_value_writer_array) {
   {
     std::stringstream stream;
 
-    minijson::write_array(stream,
-        types,
-        types + 2,
+    minijson::write_array(stream, types, types + 2,
         point_type_writer());  // functor
     ASSERT_EQ("[\"fixed\",\"moving\"]", stream.str());
   }
@@ -377,11 +360,9 @@ TEST(minijson_writer, custom_value_writer_array) {
 
     std::stringstream stream;
 
-    minijson::write_array(stream,
-        points.begin(),
+    minijson::write_array(stream, points.begin(),
         points.end());  // template specialisation
-    ASSERT_EQ("[{\"x\":-1,\"y\":1,\"z\":0},{\"x\":1,\"y\":1,\"z\":3}]",
-        stream.str());
+    ASSERT_EQ("[{\"x\":-1,\"y\":1,\"z\":0},{\"x\":1,\"y\":1,\"z\":3}]", stream.str());
   }
 }
 
@@ -416,11 +397,10 @@ TEST(minijson_writer, long_strings) {
   writer.write("field1", true);
   writer.write("field2", "f");
   writer.write("field3",
-      std::string(
-          "Quisque finibus sodales turpis eu commodo. "
-          "Cras scelerisque dignissim turpis,\nsed ullamcorper felis rutrum "
-          "sed. "
-          "Vestibulum dictum elit turpis,\3 nec laoreet est rutrum ut."));
+      std::string("Quisque finibus sodales turpis eu commodo. "
+                  "Cras scelerisque dignissim turpis,\nsed ullamcorper felis rutrum "
+                  "sed. "
+                  "Vestibulum dictum elit turpis,\3 nec laoreet est rutrum ut."));
   writer.write("field4", minijson::null);
   writer.write("field5", 42);
   writer.write("field6",
@@ -442,15 +422,13 @@ TEST(minijson_writer, long_strings) {
 TEST(minijson_writer, pretty_printing_nested) {
   std::stringstream stream;
 
-  minijson::array_writer writer(stream,
-      minijson::writer_configuration().pretty_printing(true));
+  minijson::array_writer writer(stream, minijson::writer_configuration().pretty_printing(true));
   writer.write("value1");
   {
     minijson::object_writer nested_writer1 = writer.nested_object();
     nested_writer1.write("field2", "value2");
     {
-      minijson::array_writer nested_writer2 =
-          nested_writer1.nested_array("nested2");
+      minijson::array_writer nested_writer2 = nested_writer1.nested_array("nested2");
       nested_writer2.write("value3");
       nested_writer2.write("value4");
       {
@@ -497,8 +475,7 @@ TEST(minijson_writer, pretty_printing_nested_functor) {
   points[0] = point0;
   points[1] = point1;
 
-  minijson::object_writer writer(stream,
-      minijson::writer_configuration().pretty_printing(true).use_tabs(true));
+  minijson::object_writer writer(stream, minijson::writer_configuration().pretty_printing(true).use_tabs(true));
   writer.write("point1", points[0]);
   writer.write_array("array", points.begin(), points.end());
   writer.close();

@@ -23,11 +23,7 @@ class writer_configuration {
   bool m_use_tabs;
 
  public:
-  explicit writer_configuration()
-      : m_nesting_level(0),
-        m_pretty_printing(false),
-        m_indent_spaces(4),
-        m_use_tabs(false) {}
+  explicit writer_configuration() : m_nesting_level(0), m_pretty_printing(false), m_indent_spaces(4), m_use_tabs(false) {}
 
   size_t nesting_level() const { return m_nesting_level; }
 
@@ -94,8 +90,7 @@ struct enable_if<true> {
 
 template <typename InputIt>
 struct get_value_type {
-  typedef typename std::remove_cv<
-      typename std::iterator_traits<InputIt>::value_type>::type type;
+  typedef typename std::remove_cv<typename std::iterator_traits<InputIt>::value_type>::type type;
 };
 
 template <size_t Rank>
@@ -113,12 +108,8 @@ struct two_or_three_args_functor {
 
   template <typename Arg1, typename Arg2, typename Arg3>
   auto operator_impl(Arg1&& arg1, Arg2&& arg2, Arg3&& arg3, overload_rank<1>)
-      -> decltype(functor(std::forward<Arg1>(arg1),
-          std::forward<Arg2>(arg2),
-          std::forward<Arg3>(arg3))) {
-    functor(std::forward<Arg1>(arg1),
-        std::forward<Arg2>(arg2),
-        std::forward<Arg3>(arg3));
+      -> decltype(functor(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3))) {
+    functor(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3));
   }
 
   template <typename Arg1, typename Arg2, typename Arg3>
@@ -128,21 +119,16 @@ struct two_or_three_args_functor {
   }
 
  public:
-  explicit two_or_three_args_functor(Functor _functor)
-      : functor(std::move(_functor)) {}
+  explicit two_or_three_args_functor(Functor _functor) : functor(std::move(_functor)) {}
 
   template <typename Arg1, typename Arg2, typename Arg3>
   void operator()(Arg1&& arg1, Arg2&& arg2, Arg3&& arg3) {
-    operator_impl(std::forward<Arg1>(arg1),
-        std::forward<Arg2>(arg2),
-        std::forward<Arg3>(arg3),
-        call_ranked());
+    operator_impl(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3), call_ranked());
   }
 };
 
 template <typename Functor>
-two_or_three_args_functor<Functor> wrap_two_or_three_args_functor(
-    Functor functor) {
+two_or_three_args_functor<Functor> wrap_two_or_three_args_functor(Functor functor) {
   return two_or_three_args_functor<Functor>(functor);
 }
 
@@ -159,8 +145,7 @@ class buffered_writer {
   buffered_writer& operator=(const buffered_writer&);
 
  public:
-  explicit buffered_writer(std::ostream& stream)
-      : m_stream(stream), m_offset(0) {}
+  explicit buffered_writer(std::ostream& stream) : m_stream(stream), m_offset(0) {}
 
   buffered_writer& operator<<(char c) {
     if (m_offset == Size) { flush(); }
@@ -235,8 +220,7 @@ inline void write_quoted_string(std::ostream& stream, const char* str) {
 }
 #endif
 
-inline void write_quoted_string(std::ostream& stream,
-    const std::string_view str) {
+inline void write_quoted_string(std::ostream& stream, const std::string_view str) {
   stream << std::hex << std::right << std::setfill('0');
   stream << '"';
 
@@ -292,12 +276,9 @@ class range_writer {
   ValueWriter m_value_writer;
 
  public:
-  explicit range_writer(const ValueWriter& value_writer)
-      : m_value_writer(value_writer) {}
+  explicit range_writer(const ValueWriter& value_writer) : m_value_writer(value_writer) {}
 
-  void operator()(std::ostream& stream,
-      const range<InputIt>& range,
-      const writer_configuration& configuration) const {
+  void operator()(std::ostream& stream, const range<InputIt>& range, const writer_configuration& configuration) const {
     write_array(stream, range.begin, range.end, m_value_writer, configuration);
   }
 };
@@ -313,31 +294,22 @@ class writer {
   std::ostream* m_stream;
   writer_configuration m_configuration;
 
-  enum pretty_print_token {
-    BEFORE_ELEMENT,
-    AFTER_COLON,
-    BEFORE_CLOSING_BRACKET
-  };
+  enum pretty_print_token { BEFORE_ELEMENT, AFTER_COLON, BEFORE_CLOSING_BRACKET };
 
   void write_pretty_print_token(pretty_print_token token) {
     if (!m_configuration.pretty_printing()) { return; }
 
     detail::buffered_writer<16> my_writer(*m_stream);
 
-    if ((token == BEFORE_ELEMENT) ||
-        ((token == BEFORE_CLOSING_BRACKET) && (m_status != EMPTY))) {
+    if ((token == BEFORE_ELEMENT) || ((token == BEFORE_CLOSING_BRACKET) && (m_status != EMPTY))) {
       const size_t base_depth = (token == BEFORE_ELEMENT) ? 1 : 0;
       const size_t no_indent_characters =
-          m_configuration.use_tabs()
-              ? (base_depth + m_configuration.nesting_level())
-              : (base_depth + m_configuration.nesting_level()) *
-                    m_configuration.indent_spaces();
+          m_configuration.use_tabs() ? (base_depth + m_configuration.nesting_level())
+                                     : (base_depth + m_configuration.nesting_level()) * m_configuration.indent_spaces();
 
       my_writer << '\n';
 
-      for (size_t i = 0; i < no_indent_characters; i++) {
-        my_writer << ((m_configuration.use_tabs()) ? '\t' : ' ');
-      }
+      for (size_t i = 0; i < no_indent_characters; i++) { my_writer << ((m_configuration.use_tabs()) ? '\t' : ' '); }
     } else if (token == AFTER_COLON) {
       my_writer << ' ';
     }
@@ -385,9 +357,7 @@ class writer {
   }
 
   template <typename V, typename ValueWriter>
-  void write_helper(const char* field_name,
-      const V& value,
-      const ValueWriter& value_writer) {
+  void write_helper(const char* field_name, const V& value, const ValueWriter& value_writer) {
     if (m_status == CLOSED) { return; }
 
     detail::adjust_stream_settings(*m_stream);
@@ -396,19 +366,12 @@ class writer {
 
     if (field_name != nullptr) { write_field_name(field_name); }
 
-    const writer_configuration nested_object_configuration =
-        m_configuration.increase_nesting_level();
-    detail::wrap_two_or_three_args_functor(
-        value_writer)(*m_stream, value, nested_object_configuration);
+    const writer_configuration nested_object_configuration = m_configuration.increase_nesting_level();
+    detail::wrap_two_or_three_args_functor(value_writer)(*m_stream, value, nested_object_configuration);
   }
 
-  explicit writer(std::ostream& stream,
-      bool array,
-      const writer_configuration& configuration)
-      : m_array(array),
-        m_status(EMPTY),
-        m_stream(&stream),
-        m_configuration(configuration) {}
+  explicit writer(std::ostream& stream, bool array, const writer_configuration& configuration)
+      : m_array(array), m_status(EMPTY), m_stream(&stream), m_configuration(configuration) {}
 
  public:
   std::ostream& stream() const { return *m_stream; }
@@ -442,8 +405,7 @@ class array_writer;
 
 class object_writer : public writer {
  public:
-  explicit object_writer(std::ostream& stream,
-      const writer_configuration& configuration = writer_configuration())
+  explicit object_writer(std::ostream& stream, const writer_configuration& configuration = writer_configuration())
       : writer(stream, false, configuration) {}
 
   template <typename V>
@@ -452,28 +414,18 @@ class object_writer : public writer {
   }
 
   template <typename V, typename ValueWriter>
-  void write(const char* field_name,
-      const V& value,
-      const ValueWriter& value_writer) {
+  void write(const char* field_name, const V& value, const ValueWriter& value_writer) {
     write_helper(field_name, value, value_writer);
   }
 
   template <typename InputIt>
   void write_array(const char* field_name, InputIt begin, InputIt end) {
-    write_array(field_name,
-        begin,
-        end,
-        default_value_writer<typename detail::get_value_type<InputIt>::type>());
+    write_array(field_name, begin, end, default_value_writer<typename detail::get_value_type<InputIt>::type>());
   }
 
   template <typename InputIt, typename ValueWriter>
-  void write_array(const char* field_name,
-      InputIt begin,
-      InputIt end,
-      ValueWriter value_writer) {
-    write(field_name,
-        detail::make_range(begin, end),
-        detail::range_writer<InputIt, ValueWriter>(value_writer));
+  void write_array(const char* field_name, InputIt begin, InputIt end, ValueWriter value_writer) {
+    write(field_name, detail::make_range(begin, end), detail::range_writer<InputIt, ValueWriter>(value_writer));
   }
 
   object_writer nested_object(const char* field_name);
@@ -483,8 +435,7 @@ class object_writer : public writer {
 
 class array_writer : public writer {
  public:
-  explicit array_writer(std::ostream& stream,
-      const writer_configuration& configuration = writer_configuration())
+  explicit array_writer(std::ostream& stream, const writer_configuration& configuration = writer_configuration())
       : writer(stream, true, configuration) {}
 
   template <typename V>
@@ -499,15 +450,12 @@ class array_writer : public writer {
 
   template <typename InputIt>
   void write_array(InputIt begin, InputIt end) {
-    write_array(begin,
-        end,
-        default_value_writer<typename detail::get_value_type<InputIt>::type>());
+    write_array(begin, end, default_value_writer<typename detail::get_value_type<InputIt>::type>());
   }
 
   template <typename InputIt, typename ValueWriter>
   void write_array(InputIt begin, InputIt end, ValueWriter value_writer) {
-    write(detail::make_range(begin, end),
-        detail::range_writer<InputIt, ValueWriter>(value_writer));
+    write(detail::make_range(begin, end), detail::range_writer<InputIt, ValueWriter>(value_writer));
   }
 
   object_writer nested_object();
@@ -556,16 +504,12 @@ struct default_value_writer<null_t> {
 
 template <>
 struct default_value_writer<std::nullptr_t> {
-  void operator()(std::ostream& stream, std::nullptr_t) const {
-    default_value_writer<null_t>()(stream, null);
-  }
+  void operator()(std::ostream& stream, std::nullptr_t) const { default_value_writer<null_t>()(stream, null); }
 };
 
 template <typename IntegralType>
 struct default_value_writer<IntegralType,
-    typename detail::enable_if<
-        std::is_integral<IntegralType>::value &&
-        !std::is_same<IntegralType, bool>::value>::type> {
+    typename detail::enable_if<std::is_integral<IntegralType>::value && !std::is_same<IntegralType, bool>::value>::type> {
   void operator()(std::ostream& stream, IntegralType value) const {
     // the unary plus is used here to force chars to be printed as integers
     stream << +value;
@@ -585,8 +529,7 @@ struct default_value_writer<bool> {
 
 template <typename FloatingPoint>
 struct default_value_writer<FloatingPoint,
-    typename detail::enable_if<
-        std::is_floating_point<FloatingPoint>::value>::type> {
+    typename detail::enable_if<std::is_floating_point<FloatingPoint>::value>::type> {
   void operator()(std::ostream& stream, FloatingPoint value) const {
     // Numeric values that cannot be represented as sequences of digits
     // (such as Infinity and NaN) are not permitted in JSON
@@ -600,29 +543,22 @@ struct default_value_writer<FloatingPoint,
 
 template <>
 struct default_value_writer<std::string_view> {
-  void operator()(std::ostream& stream, const std::string_view str) const {
-    detail::write_quoted_string(stream, str);
-  }
+  void operator()(std::ostream& stream, const std::string_view str) const { detail::write_quoted_string(stream, str); }
 };
 
 template <>
 struct default_value_writer<char*> {
-  void operator()(std::ostream& stream, const char* str) const {
-    detail::write_quoted_string(stream, str);
-  }
+  void operator()(std::ostream& stream, const char* str) const { detail::write_quoted_string(stream, str); }
 };
 
 template <>
-struct default_value_writer<const char*> : public default_value_writer<char*> {
-};
+struct default_value_writer<const char*> : public default_value_writer<char*> {};
 
 template <size_t N>
-struct default_value_writer<char[N]> : public default_value_writer<char*> {
-};  // FIXME: this may discard some chars! CK
+struct default_value_writer<char[N]> : public default_value_writer<char*> {};  // FIXME: this may discard some chars! CK
 
 template <size_t N>
-struct default_value_writer<const char[N]>
-    : public default_value_writer<char*> {
+struct default_value_writer<const char[N]> : public default_value_writer<char*> {
 };  // FIXME: this may discard some chars! CK
 
 template <>
@@ -633,15 +569,8 @@ struct default_value_writer<std::string> {
 };
 
 template <typename InputIt>
-void write_array(std::ostream& stream,
-    InputIt begin,
-    InputIt end,
-    const writer_configuration& configuration) {
-  write_array(stream,
-      begin,
-      end,
-      default_value_writer<typename detail::get_value_type<InputIt>::type>(),
-      configuration);
+void write_array(std::ostream& stream, InputIt begin, InputIt end, const writer_configuration& configuration) {
+  write_array(stream, begin, end, default_value_writer<typename detail::get_value_type<InputIt>::type>(), configuration);
 }
 
 template <typename InputIt, typename ValueWriter>
